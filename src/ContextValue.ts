@@ -9,7 +9,6 @@ type ExtraContextValue<T> = T extends string | number | boolean | null
 export type ContextValue<T> = ExtraContextValue<T> & {
   readonly [ContextValueString]: () => string;
   readonly [ContextValueType]?: T;
-
   readonly toJSON: () => string;
 };
 

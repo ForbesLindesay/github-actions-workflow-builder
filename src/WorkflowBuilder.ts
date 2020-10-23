@@ -1,7 +1,8 @@
 import {github, matrix, needs, StepContext} from './context';
-import {and, ContextValue, eq, Expression} from './expressions';
+import {and, ContextValue, eq, Expression} from './expression';
 import createContextValue from './ContextValue';
 import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
+import sortKeys from './sortKeys';
 
 declare const JobOutputsSymbol: unique symbol;
 export interface Job<T> {
@@ -124,7 +125,23 @@ export interface WorkflowContext {
 
   addJob<TJobOutputs extends void | Record<string, Expression<any>>>(
     jobName: string,
-    fn: (context: JobContext) => TJobOutputs,
+    fn: ({
+      jobName,
+      setName,
+      setMachineType,
+      setContainer,
+      setEnv,
+      setTimeout,
+      continueOnError,
+      setBuildMatrix,
+      addService,
+      addDependencies,
+      add,
+      run,
+      use,
+      when,
+      whenTrigger,
+    }: JobContext) => TJobOutputs,
   ): Job<
     TJobOutputs extends Record<string, Expression<any>>
       ? {
@@ -180,7 +197,13 @@ function conditions() {
 
 let creatingWorkflow = false;
 export default function createWorkflow(
-  fn: (ctx: WorkflowContext) => void,
+  fn: ({
+    setWorkflowName,
+    addTrigger,
+    addJob,
+    when,
+    whenTrigger,
+  }: WorkflowContext) => void,
 ): any {
   if (creatingWorkflow) {
     throw new Error('You can only create one workflow at a time.');
@@ -197,7 +220,6 @@ export default function createWorkflow(
     fn({
       ...conditionHelpers,
       setWorkflowName(workflowName) {
-        workflow.name = workflowName;
         if (workflow.name) {
           throw new Error('You cannot set the workflow name multiple times.');
         }
@@ -349,14 +371,14 @@ export default function createWorkflow(
             optionsOrUndefined?: UseStepOptions,
           ) => {
             const id = `step_${nextStepID++}`;
-            const [name, using, options] =
+            const [name, uses, options] =
               typeof scriptOrOptions === 'string'
                 ? [nameOrScript, scriptOrOptions, optionsOrUndefined]
                 : [undefined, nameOrScript, scriptOrOptions];
             const step: any = {
               ...(name ? {name} : {}),
               ...currentJobCondition(),
-              using,
+              uses,
               ...(options?.with ? {with: options.with} : {}),
               ...(options?.env ? {env: options.env} : {}),
               ...(options?.continueOnError
@@ -376,11 +398,25 @@ export default function createWorkflow(
         if (outputs) {
           job.outputs = outputs;
         }
-        workflow.jobs[jobName] = job;
+        workflow.jobs[jobName] = sortKeys(job, [
+          'name',
+          'needs',
+          'runs-on',
+          'env',
+          'defaults',
+          'if',
+          'timeout-minutes',
+          'strategy',
+          'continue-on-error',
+          'container',
+          'services',
+          'steps',
+          'outputs',
+        ]);
         return {name: jobName};
       },
     });
-    return workflow;
+    return sortKeys(workflow, ['name', 'on', 'env', 'deults', 'jobs']);
   } finally {
     creatingWorkflow = false;
   }

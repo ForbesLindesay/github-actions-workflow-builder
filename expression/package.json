@@ -1,0 +1,4 @@
+{
+  "main": "../lib/expression.js",
+  "types": "../lib/expression.d.ts"
+}

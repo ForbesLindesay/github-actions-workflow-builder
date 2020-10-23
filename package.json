@@ -10,8 +10,10 @@
   "author": "Forbes Lindesay <forbes@lindesay.co.uk>",
   "license": "MIT",
   "scripts": {
+    "update-workflows": "node lib/cli --directory .github/workflows-src",
+    "prebuild": "rimraf lib",
     "build": "rollup -c",
-    "postbuild": "tsc --noEmit && rimraf lib/**/__tests__",
+    "postbuild": "tsc --noEmit && rimraf lib/**/__tests__ && rimraf lib/cli.d.ts",
     "lint": "tslint './src/**/*.{ts,tsx}' -t verbose -p .",
     "prettier:write": "prettier --ignore-path .gitignore --write './**/*.{md,json,yaml,js,jsx,ts,tsx}'",
     "prettier:check": "prettier --ignore-path .gitignore --list-different './**/*.{md,json,yaml,js,jsx,ts,tsx}'",

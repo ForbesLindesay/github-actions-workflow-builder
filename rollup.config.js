@@ -7,6 +7,8 @@ import pkg from './package.json';
 
 export default {
   input: {
+    expression: 'src/expression.ts',
+    context: 'src/context.ts',
     index: 'src/index.ts',
     cli: 'src/cli.ts',
   },
@@ -17,16 +19,17 @@ export default {
       format: 'cjs',
       exports: 'named',
     },
-    {
-      dir: 'lib/',
-      entryFileNames: '[name].mjs',
-      chunkFileNames: '[name]-[hash].mjs',
-      format: 'es',
-    },
+    // {
+    //   dir: 'lib/',
+    //   entryFileNames: '[name].mjs',
+    //   chunkFileNames: '[name]-[hash].mjs',
+    //   format: 'es',
+    // },
   ],
   external: [
     'fs',
     'path',
+    'module',
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],

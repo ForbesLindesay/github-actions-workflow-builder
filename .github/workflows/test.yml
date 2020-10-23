@@ -1,5 +1,9 @@
-name: Test
+# !!! This file is auto-generated, do not edit by hand !!!
+# To make changes, edit .github/workflows-src/test.ts and then run:
+#
+#   github-actions-workflow-builder --directory ".github/workflows-src""
 
+name: Test
 on:
   push:
     branches:
@@ -7,15 +11,15 @@ on:
   pull_request:
     branches:
       - master
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
-
+        node-version:
+          - 10.x
+          - 12.x
+          - 14.x
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -23,4 +27,23 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install --frozen-lockfile
       - run: yarn build
-      - run: yarn test
+      - name: Dump job context
+        run: echo $JOB_CONTEXT
+        env:
+          JOB_CONTEXT: ${{ toJSON(job}) }}
+      - name: Dump steps context
+        run: echo $STEPS_CONTEXT
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps}) }}
+      - name: Dump runner context
+        run: echo $RUNNER_CONTEXT
+        env:
+          RUNNER_CONTEXT: ${{ toJSON(runner}) }}
+      - name: Dump strategy context
+        run: echo $STRATEGY_CONTEXT
+        env:
+          STRATEGY_CONTEXT: ${{ toJSON(strategy}) }}
+      - name: Dump matrix context
+        run: echo $MATRIX_CONTEXT
+        env:
+          MATRIX_CONTEXT: ${{ toJSON(matrix}) }}

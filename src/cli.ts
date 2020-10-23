@@ -40,9 +40,21 @@ for (const fullFilename of expandDirectories(sourceDirectory)) {
       .replace(/\.ts$/, '.yml'),
   );
   const workflow = require(fullFilename).default;
-  if (writeYamlFile(yamlFile, workflow, {dryRun: check}) && check) {
+  if (
+    writeYamlFile(yamlFile, workflow, {
+      dryRun: check,
+      originalFilename: relative(process.cwd(), fullFilename).replace(
+        /\\/g,
+        '/',
+      ),
+      command: `github-actions-workflow-builder --directory "${directory}"`,
+    }) &&
+    check
+  ) {
     console.error(
-      'Your github actions workflows are out of date. Run github-actions-workflow-builder to update them.',
+      `Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}"${
+        cleanup ? ` --cleanup` : ``
+      }\` to update them.`,
     );
     process.exit(1);
   }
@@ -55,7 +67,7 @@ if (cleanup) {
     if (/\.yml$/.test(fullFilename) && !workflows.includes(fullFilename)) {
       if (check) {
         console.error(
-          'Your github actions workflows are out of date. Run github-actions-workflow-builder to update them.',
+          `Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}" --cleanup\` to update them.`,
         );
         process.exit(1);
       } else {

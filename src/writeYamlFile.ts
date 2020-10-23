@@ -15,9 +15,13 @@ function tryReadFileSync(filename: string) {
 export default function writeYamlFile(
   filename: string,
   object: any,
-  {dryRun = false}: {dryRun: boolean},
+  {
+    dryRun = false,
+    originalFilename,
+    command,
+  }: {dryRun: boolean; originalFilename: string; command: string},
 ) {
-  const yamlSource = `# !!! This file is auto-generated, do not edit by hand !!!\n# To make changes, edit .build/workflows/${filename} and then run "yarn github-actions-workflow-builder"\n${stringify(
+  const yamlSource = `# !!! This file is auto-generated, do not edit by hand !!!\n# To make changes, edit ${originalFilename} and then run:\n#\n#   ${command}"\n\n${stringify(
     object,
   )}`;
 
