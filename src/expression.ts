@@ -220,13 +220,13 @@ export function join(
 }
 
 export function toJSON<T>(value: Expression<T>): JsonExpression<T> {
-  return createExpression(`toJSON(${valueToString(value)}})`);
+  return createExpression(`toJSON(${valueToString(value)})`);
 }
 
 export function fromJSON<T>(value: JsonExpression<T>): Expression<T>;
 export function fromJSON(value: Expression<string>): Expression<unknown>;
 export function fromJSON(value: Expression<string>): Expression<unknown> {
-  return createExpression(`toJSON(${valueToString(value)}})`);
+  return createExpression(`fromJSON(${valueToString(value)})`);
 }
 
 export function hashFiles(

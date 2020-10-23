@@ -6,6 +6,11 @@
   "bin": {
     "github-actions-workflow-builder": "./lib/cli.js"
   },
+  "files": [
+    "context/",
+    "expression/",
+    "lib/"
+  ],
   "repository": "git@github.com:ForbesLindesay/npm-package-template.git",
   "author": "Forbes Lindesay <forbes@lindesay.co.uk>",
   "license": "MIT",

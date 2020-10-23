@@ -30,20 +30,20 @@ jobs:
       - name: Dump job context
         run: echo $JOB_CONTEXT
         env:
-          JOB_CONTEXT: ${{ toJSON(job}) }}
+          JOB_CONTEXT: ${{ toJSON(job) }}
       - name: Dump steps context
         run: echo $STEPS_CONTEXT
         env:
-          STEPS_CONTEXT: ${{ toJSON(steps}) }}
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
       - name: Dump runner context
         run: echo $RUNNER_CONTEXT
         env:
-          RUNNER_CONTEXT: ${{ toJSON(runner}) }}
+          RUNNER_CONTEXT: ${{ toJSON(runner) }}
       - name: Dump strategy context
         run: echo $STRATEGY_CONTEXT
         env:
-          STRATEGY_CONTEXT: ${{ toJSON(strategy}) }}
+          STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
       - name: Dump matrix context
         run: echo $MATRIX_CONTEXT
         env:
-          MATRIX_CONTEXT: ${{ toJSON(matrix}) }}
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
