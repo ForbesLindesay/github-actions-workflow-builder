@@ -1,6 +1,12 @@
 import createWorkflow from '../../';
 import {env, job, steps, runner, needs, strategy, matrix} from '../../context';
-import {Expression, toJSON} from '../../expression';
+import {
+  Expression,
+  hashFiles,
+  interpolate,
+  neq,
+  toJSON,
+} from '../../expression';
 
 export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   setWorkflowName('Test');
@@ -8,14 +14,34 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   addTrigger('push', {branches: ['master']});
   addTrigger('pull_request', {branches: ['master']});
 
-  addJob('test', ({setBuildMatrix, use, run}) => {
+  addJob('test', ({setBuildMatrix, use, run, when}) => {
     const nodeVersion = setBuildMatrix({
       'node-version': ['10.x', '12.x', '14.x'],
     })['node-version'];
 
     use('actions/checkout@v2');
     use('actions/setup-node@v1', {with: {'node-version': nodeVersion}});
-    run('yarn install --frozen-lockfile');
+
+    const {
+      outputs: {'cache-hit': cacheHit},
+    } = use<{'cache-hit': 'true' | 'false'}>(
+      'Enable Cache',
+      'actions/cache@v2',
+      {
+        with: {
+          path: 'node_modules',
+          key: interpolate`${runner.os}-${nodeVersion}-${hashFiles(
+            'package.json',
+            'yarn.lock',
+          )}`,
+        },
+      },
+    );
+
+    when(neq(cacheHit, 'true'), () => {
+      run('yarn install --frozen-lockfile');
+    });
+
     run('yarn build');
 
     function dumpContext(name: string, context: Expression<unknown>) {

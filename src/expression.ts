@@ -11,11 +11,7 @@ export type ComplexExpression<T> = {
   readonly toJSON: () => string;
 };
 
-export type Literal =
-  | (string & {_hasInterpolation?: false})
-  | number
-  | boolean
-  | null;
+export type Literal = string | number | boolean | null;
 
 export type Expression<T> =
   | ComplexExpression<T>
@@ -253,7 +249,7 @@ export function failure(): JsonExpression<boolean> {
 export function interpolate(
   strings: TemplateStringsArray,
   ...parameters: Expression<string>[]
-): string & {_hasInterpolation?: true} {
+): string {
   let result = '';
   for (let i = 0; i < strings.length; i++) {
     result += strings[i];

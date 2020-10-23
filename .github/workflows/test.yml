@@ -25,7 +25,15 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn install --frozen-lockfile
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{runner.os}}-${{matrix.node-version}}-${{hashFiles('package.json',
+            'yarn.lock'})}}
+        id: step_3
+      - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
+        run: yarn install --frozen-lockfile
       - run: yarn build
       - name: Dump job context
         run: echo $JOB_CONTEXT

@@ -87,21 +87,21 @@ export interface JobContext {
   run<TStepOutput>(
     script: string,
     options?: RunStepOptions,
-  ): StepContext<TStepOutput>;
+  ): ContextValue<StepContext<TStepOutput>>;
   run<TStepOutput = {}>(
     stepName: string,
     script: string,
     options?: RunStepOptions,
-  ): StepContext<TStepOutput>;
+  ): ContextValue<StepContext<TStepOutput>>;
   use<TStepOutput = {}>(
     actionName: string,
     options?: UseStepOptions,
-  ): StepContext<TStepOutput>;
+  ): ContextValue<StepContext<TStepOutput>>;
   use<TStepOutput = {}>(
     stepName: string,
     actionName: string,
     options?: UseStepOptions,
-  ): StepContext<TStepOutput>;
+  ): ContextValue<StepContext<TStepOutput>>;
 
   when<T>(condition: Expression<boolean>, fn: () => T): T;
   whenTrigger<TriggerName extends keyof TriggerEvents, T>(
