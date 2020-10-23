@@ -229,7 +229,7 @@ export function hashFiles(
   ...paths: [Expression<string>, ...Expression<string>[]]
 ): JsonExpression<string> {
   return createExpression(
-    `hashFiles(${paths.map((path) => valueToString(path)).join(', ')}})`,
+    `hashFiles(${paths.map((path) => valueToString(path)).join(', ')})`,
   );
 }
 
