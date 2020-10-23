@@ -30,7 +30,7 @@ jobs:
         with:
           path: node_modules
           key: ${{runner.os}}-${{matrix.node-version}}-${{hashFiles('package.json',
-            'yarn.lock'})}}
+            'yarn.lock')}}
         id: step_3
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
         run: yarn install --frozen-lockfile
