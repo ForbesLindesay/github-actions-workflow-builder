@@ -148,9 +148,11 @@ export interface WorkflowContext {
   ): JobReference<
     TJobOutputs extends Record<string, Expression<any>>
       ? {
-          [key in keyof TJobOutputs]: Expression<
-            TJobOutputs[key] extends Expression<infer T> ? T : unknown
-          >;
+          [key in keyof TJobOutputs]: TJobOutputs[key] extends Expression<
+            infer T
+          >
+            ? T
+            : unknown;
         }
       : void
   >;
