@@ -1,7 +1,6 @@
 {
   "name": "github-actions-workflow-builder",
-  "version": "0.0.0",
-  "description": "npm-package-template",
+  "description": "Build workflows for GitHub actions using TypeScript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
@@ -12,7 +11,7 @@
     "expression/",
     "lib/"
   ],
-  "repository": "git@github.com:ForbesLindesay/npm-package-template.git",
+  "repository": "git@github.com:ForbesLindesay/github-actions-workflow-builder.git",
   "author": "Forbes Lindesay <forbes@lindesay.co.uk>",
   "license": "MIT",
   "scripts": {
