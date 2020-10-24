@@ -35,6 +35,10 @@ jobs:
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
         run: yarn install --frozen-lockfile
       - run: yarn build
+      - name: Dump github_event context
+        run: echo $GITHUB_EVENT_CONTEXT
+        env:
+          GITHUB_EVENT_CONTEXT: ${{ toJSON(github.event) }}
       - name: Dump job context
         run: echo $JOB_CONTEXT
         env:

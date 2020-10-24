@@ -53,6 +53,7 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
       env: {[`${name.toUpperCase()}_CONTEXT`]: toJSON(context)},
     });
   }
+  dumpContext('github_event', github.event);
   dumpContext('job', job);
   dumpContext('steps', steps);
   dumpContext('runner', runner);
