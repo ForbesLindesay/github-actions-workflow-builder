@@ -72,9 +72,13 @@ export interface RunnerContext {
 }
 export const runner: ContextValue<RunnerContext> = createContextValue('runner');
 
+export interface NeedsJobContext<TOutputs = {[name: string]: string}> {
+  outputs: TOutputs;
+  result: Result;
+}
 export interface Needs {
   [jobID: string]: {
-    outputs: {[name: string]: string};
+    outputs: NeedsJobContext;
     result: Result;
   };
 }

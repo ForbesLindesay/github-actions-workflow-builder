@@ -1,4 +1,4 @@
-import {github, matrix, needs, StepContext} from './context';
+import {github, matrix, needs, NeedsJobContext, StepContext} from './context';
 import {and, ContextValue, eq, Expression} from './expression';
 import createContextValue from './ContextValue';
 import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
@@ -99,7 +99,7 @@ export interface JobContext {
   addDependencies<TJobOutputs>(
     job: JobReference<TJobOutputs>,
     ...jobs: JobReference<unknown>[]
-  ): ContextValue<TJobOutputs>;
+  ): ContextValue<NeedsJobContext<TJobOutputs>>;
 
   add<TStepOutput>(step: Steps<TStepOutput>): TStepOutput;
 
