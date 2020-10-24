@@ -312,11 +312,17 @@ export default function createWorkflow(
             job.strategy = {
               matrix: {
                 ...matrixConfig,
-                ...(options.include ? {include: options.include} : {}),
-                ...(options.exclude ? {exclude: options.exclude} : {}),
+                ...(options.include !== undefined
+                  ? {include: options.include}
+                  : {}),
+                ...(options.exclude !== undefined
+                  ? {exclude: options.exclude}
+                  : {}),
               },
-              ...(options.failFast ? {'fail-fast': options.failFast} : {}),
-              ...(options.maxParallel
+              ...(options.failFast !== undefined
+                ? {'fail-fast': options.failFast}
+                : {}),
+              ...(options.maxParallel !== undefined
                 ? {'max-parallel': options.maxParallel}
                 : {}),
             };
@@ -353,15 +359,15 @@ export default function createWorkflow(
               ...(name ? {name} : {}),
               ...currentJobCondition(),
               run: script,
-              ...(options?.workingDirectory
+              ...(options?.workingDirectory !== undefined
                 ? {'working-directory': options.workingDirectory}
                 : {}),
-              ...(options?.shell ? {shell: options.shell} : {}),
-              ...(options?.env ? {env: options.env} : {}),
-              ...(options?.continueOnError
+              ...(options?.shell !== undefined ? {shell: options.shell} : {}),
+              ...(options?.env !== undefined ? {env: options.env} : {}),
+              ...(options?.continueOnError !== undefined
                 ? {'continue-on-error': options.continueOnError}
                 : {}),
-              ...(options?.timeoutMinutes
+              ...(options?.timeoutMinutes !== undefined
                 ? {'timeout-minutes': options.timeoutMinutes}
                 : {}),
             };
@@ -384,12 +390,12 @@ export default function createWorkflow(
               ...(name ? {name} : {}),
               ...currentJobCondition(),
               uses,
-              ...(options?.with ? {with: options.with} : {}),
-              ...(options?.env ? {env: options.env} : {}),
-              ...(options?.continueOnError
+              ...(options?.with !== undefined ? {with: options.with} : {}),
+              ...(options?.env !== undefined ? {env: options.env} : {}),
+              ...(options?.continueOnError !== undefined
                 ? {'continue-on-error': options.continueOnError}
                 : {}),
-              ...(options?.timeoutMinutes
+              ...(options?.timeoutMinutes !== undefined
                 ? {'timeout-minutes': options.timeoutMinutes}
                 : {}),
             };
