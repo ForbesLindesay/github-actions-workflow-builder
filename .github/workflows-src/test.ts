@@ -42,7 +42,12 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
   })['node-version'];
 
   use('actions/checkout@v2');
-  use('actions/setup-node@v1', {with: {'node-version': nodeVersion}});
+  use('actions/setup-node@v1', {
+    with: {
+      'node-version': nodeVersion,
+      'registry-url': 'https://registry.npmjs.org',
+    },
+  });
 
   add(yarnInstallWithCache(nodeVersion));
 
