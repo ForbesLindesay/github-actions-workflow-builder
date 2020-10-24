@@ -17,7 +17,7 @@ const {check = false, cleanup = false, directory} = parse(
 ).extract();
 
 if (!directory) {
-  console.error('You must specify the source directory for your workflows:');
+  console.error('🚨 You must specify the source directory for your workflows:');
   console.error('');
   console.error(
     '  github-actions-workflow-builder --directory .github/workflows-src',
@@ -52,7 +52,7 @@ for (const fullFilename of expandDirectories(sourceDirectory)) {
     check
   ) {
     console.error(
-      `Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}"${
+      `🚨 Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}"${
         cleanup ? ` --cleanup` : ``
       }\` to update them.`,
     );
@@ -67,7 +67,7 @@ if (cleanup) {
     if (/\.yml$/.test(fullFilename) && !workflows.includes(fullFilename)) {
       if (check) {
         console.error(
-          `Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}" --cleanup\` to update them.`,
+          `🚨 Your github actions workflows are out of date. Run \`github-actions-workflow-builder --directory "${directory}" --cleanup\` to update them.`,
         );
         process.exit(1);
       } else {
