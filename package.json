@@ -1,5 +1,6 @@
 {
-  "name": "@forbeslindesay/npm-package-template",
+  "name": "github-actions-workflow-builder",
+  "version": "0.0.0",
   "description": "npm-package-template",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

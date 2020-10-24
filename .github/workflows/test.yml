@@ -55,3 +55,8 @@ jobs:
         run: echo $MATRIX_CONTEXT
         env:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+      - if: ${{ github.event_name == 'push' }}
+        run: npx rollingversions publish --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

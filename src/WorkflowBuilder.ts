@@ -5,12 +5,31 @@ import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
 import sortKeys from './sortKeys';
 
 declare const JobOutputsSymbol: unique symbol;
-export interface Job<T> {
+export interface JobReference<T> {
   name: string;
   [JobOutputsSymbol]?: T;
 }
 
-export type Steps<TStepOutput> = (context: JobContext) => TStepOutput;
+export type Steps<TStepOutput = unknown> = (context: JobContext) => TStepOutput;
+export type Job<
+  TJobOutput extends void | Record<string, Expression<any>> = void
+> = ({
+  jobName,
+  setName,
+  setMachineType,
+  setContainer,
+  setEnv,
+  setTimeout,
+  continueOnError,
+  setBuildMatrix,
+  addService,
+  addDependencies,
+  add,
+  run,
+  use,
+  when,
+  whenTrigger,
+}: JobContext) => TJobOutput;
 
 export interface RunStepOptions {
   workingDirectory?: string;
@@ -78,8 +97,8 @@ export interface JobContext {
   }): void;
 
   addDependencies<TJobOutputs>(
-    job: Job<TJobOutputs>,
-    ...jobs: Job<unknown>[]
+    job: JobReference<TJobOutputs>,
+    ...jobs: JobReference<unknown>[]
   ): ContextValue<TJobOutputs>;
 
   add<TStepOutput>(step: Steps<TStepOutput>): TStepOutput;
@@ -125,24 +144,8 @@ export interface WorkflowContext {
 
   addJob<TJobOutputs extends void | Record<string, Expression<any>>>(
     jobName: string,
-    fn: ({
-      jobName,
-      setName,
-      setMachineType,
-      setContainer,
-      setEnv,
-      setTimeout,
-      continueOnError,
-      setBuildMatrix,
-      addService,
-      addDependencies,
-      add,
-      run,
-      use,
-      when,
-      whenTrigger,
-    }: JobContext) => TJobOutputs,
-  ): Job<
+    fn: Job<TJobOutputs>,
+  ): JobReference<
     TJobOutputs extends Record<string, Expression<any>>
       ? {
           [key in keyof TJobOutputs]: Expression<

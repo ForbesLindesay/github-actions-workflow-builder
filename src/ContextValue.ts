@@ -40,7 +40,7 @@ export default function createContextValue<T>(
         // returns an array
         return createContextValue<any>(`${path}.${key}`);
       }
-      if (/^[a-z_][a-z0-9-_]+$/.test(key)) {
+      if (/^[a-z_][a-z0-9-_]+$/i.test(key)) {
         return createContextValue<any>(`${path}.${key}`);
       }
       return createContextValue<any>(`${path}['${key.replace(/\'/g, `''`)}']`);
