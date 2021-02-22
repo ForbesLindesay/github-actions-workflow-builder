@@ -227,22 +227,22 @@ export function fromJSON(value: Expression<string>): Expression<unknown> {
 
 export function hashFiles(
   ...paths: [Expression<string>, ...Expression<string>[]]
-): JsonExpression<string> {
+): Expression<string> {
   return createExpression(
     `hashFiles(${paths.map((path) => valueToString(path)).join(', ')})`,
   );
 }
 
-export function success(): JsonExpression<boolean> {
+export function success(): Expression<boolean> {
   return createExpression(`success()`);
 }
-export function always(): JsonExpression<boolean> {
+export function always(): Expression<boolean> {
   return createExpression(`always()`);
 }
-export function cancelled(): JsonExpression<boolean> {
+export function cancelled(): Expression<boolean> {
   return createExpression(`cancelled()`);
 }
-export function failure(): JsonExpression<boolean> {
+export function failure(): Expression<boolean> {
   return createExpression(`failure()`);
 }
 
