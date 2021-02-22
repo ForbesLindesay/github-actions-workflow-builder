@@ -1,5 +1,5 @@
 import {secrets} from './context';
-import {eq, Expression, joinStrings, neq} from './expression';
+import {eq, Expression, format, joinStrings, neq} from './expression';
 import {Steps} from './WorkflowBuilder';
 
 export interface CheckoutOptions {
@@ -117,7 +117,7 @@ export function uploadArtifact(
         'retention-days': options.retentionDays,
       },
     });
-    return {name: options.name};
+    return {name: format(`{0}`, options.name)};
   };
 }
 

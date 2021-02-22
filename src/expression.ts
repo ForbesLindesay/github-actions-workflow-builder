@@ -6,9 +6,10 @@ const ExpressionString = Symbol('expressionString');
 const ExpressionType = Symbol('expressionType');
 const JsonStringType = Symbol('jsonStringType');
 export type ComplexExpression<T> = {
-  readonly [ExpressionString]: string;
+  readonly [ExpressionString]: () => string;
   readonly [ExpressionType]?: T;
   readonly toJSON: () => string;
+  readonly toString: () => string;
 };
 
 export type Literal = string | number | boolean | null;
@@ -22,10 +23,14 @@ export type JsonExpression<T> = ComplexExpression<string> & {
   readonly [JsonStringType]?: T;
 };
 
-function createExpression<T>(str: string): ComplexExpression<T> {
+function createExpression<T>(
+  str: () => string,
+  expr: () => string = () => `\${{ ${str()} }}`,
+): ComplexExpression<T> {
   return {
     [ExpressionString]: str,
-    toJSON: () => '${{ ' + str + ' }}',
+    toJSON: expr,
+    toString: expr,
   };
 }
 
@@ -35,7 +40,7 @@ function isComplexExpression(
   return (
     typeof expression === 'object' &&
     !!expression &&
-    typeof (expression as any)[ExpressionString] === 'string'
+    typeof (expression as any)[ExpressionString] === 'function'
   );
 }
 
@@ -84,14 +89,14 @@ function valueToString(
   }
 
   if (isComplexExpression(value)) {
-    return value[ExpressionString].trim();
+    return value[ExpressionString]().trim();
   }
 
   throw new Error(`Unsupported type: ${typeof value}`);
 }
 
 export function not(value: Expression<boolean>): Expression<boolean> {
-  return createExpression(`!${valueToString(value, true)}`);
+  return createExpression(() => `!${valueToString(value, true)}`);
 }
 
 export function gt(
@@ -99,7 +104,7 @@ export function gt(
   right: Expression<number>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} > ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} > ${valueToString(right, true)}`,
   );
 }
 
@@ -108,7 +113,7 @@ export function gteq(
   right: Expression<number>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} >= ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} >= ${valueToString(right, true)}`,
   );
 }
 
@@ -117,7 +122,7 @@ export function lt(
   right: Expression<number>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} < ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} < ${valueToString(right, true)}`,
   );
 }
 
@@ -126,7 +131,7 @@ export function lteq(
   right: Expression<number>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} <= ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} <= ${valueToString(right, true)}`,
   );
 }
 
@@ -135,7 +140,7 @@ export function eq(
   right: Expression<unknown>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} == ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} == ${valueToString(right, true)}`,
   );
 }
 
@@ -144,7 +149,7 @@ export function neq(
   right: Expression<unknown>,
 ): Expression<boolean> {
   return createExpression(
-    `${valueToString(left, true)} != ${valueToString(right, true)}`,
+    () => `${valueToString(left, true)} != ${valueToString(right, true)}`,
   );
 }
 
@@ -161,9 +166,9 @@ function joinConditions(
   ...conditions: Expression<boolean>[]
 ): Expression<boolean> {
   if (conditions.length === 1) {
-    return createExpression(valueToString(conditions[0]));
+    return createExpression(() => valueToString(conditions[0]));
   }
-  return createExpression(
+  return createExpression(() =>
     conditions.map((c) => valueToString(c, true)).join(joiner),
   );
 }
@@ -173,7 +178,7 @@ export function contains(
   item: Expression<unknown>,
 ): Expression<boolean> {
   return createExpression(
-    `contains(${valueToString(search)}, ${valueToString(item)})`,
+    () => `contains(${valueToString(search)}, ${valueToString(item)})`,
   );
 }
 
@@ -182,7 +187,7 @@ export function startsWith(
   item: Expression<unknown>,
 ): Expression<boolean> {
   return createExpression(
-    `startsWith(${valueToString(search)}, ${valueToString(item)})`,
+    () => `startsWith(${valueToString(search)}, ${valueToString(item)})`,
   );
 }
 
@@ -191,7 +196,7 @@ export function endsWith(
   item: Expression<unknown>,
 ): Expression<boolean> {
   return createExpression(
-    `endsWith(${valueToString(search)}, ${valueToString(item)})`,
+    () => `endsWith(${valueToString(search)}, ${valueToString(item)})`,
   );
 }
 
@@ -200,9 +205,10 @@ export function format(
   ...items: Expression<unknown>[]
 ): Expression<string> {
   return createExpression(
-    `format(${valueToString(format)}, ${items
-      .map((item) => valueToString(item))
-      .join(', ')})`,
+    () =>
+      `format(${valueToString(format)}, ${items
+        .map((item) => valueToString(item))
+        .join(', ')})`,
   );
 }
 
@@ -211,39 +217,39 @@ export function join(
   separator: string = ', ',
 ): Expression<string> {
   return createExpression(
-    `join(${valueToString(array)}, ${valueToString(separator)})`,
+    () => `join(${valueToString(array)}, ${valueToString(separator)})`,
   );
 }
 
 export function toJSON<T>(value: Expression<T>): JsonExpression<T> {
-  return createExpression(`toJSON(${valueToString(value)})`);
+  return createExpression(() => `toJSON(${valueToString(value)})`);
 }
 
 export function fromJSON<T>(value: JsonExpression<T>): Expression<T>;
 export function fromJSON(value: Expression<string>): Expression<unknown>;
 export function fromJSON(value: Expression<string>): Expression<unknown> {
-  return createExpression(`fromJSON(${valueToString(value)})`);
+  return createExpression(() => `fromJSON(${valueToString(value)})`);
 }
 
 export function hashFiles(
   ...paths: [Expression<string>, ...Expression<string>[]]
 ): Expression<string> {
   return createExpression(
-    `hashFiles(${paths.map((path) => valueToString(path)).join(', ')})`,
+    () => `hashFiles(${paths.map((path) => valueToString(path)).join(', ')})`,
   );
 }
 
 export function success(): Expression<boolean> {
-  return createExpression(`success()`);
+  return createExpression(() => `success()`);
 }
 export function always(): Expression<boolean> {
-  return createExpression(`always()`);
+  return createExpression(() => `always()`);
 }
 export function cancelled(): Expression<boolean> {
-  return createExpression(`cancelled()`);
+  return createExpression(() => `cancelled()`);
 }
 export function failure(): Expression<boolean> {
-  return createExpression(`failure()`);
+  return createExpression(() => `failure()`);
 }
 
 export function interpolate(
@@ -264,30 +270,44 @@ export function joinStrings(
   strings: Expression<string>[],
   separator: string = ',',
 ): Expression<string> {
-  let index = 0;
-  const params: string[] = [];
-  const formatString = strings
-    .map((str) => {
+  if (
+    strings.every((str) => {
       switch (typeof str) {
         case 'string':
         case 'number':
         case 'boolean':
-          return str.replace(/\{/g, '{{').replace(/\}/g, '}}');
+          return true;
         default:
-          params.push(valueToString(str));
-          return `{${index++}}`;
+          return false;
       }
     })
-    .join(separator.replace(/\{/g, '{{').replace(/\}/g, '}}'));
-  if (params.length === 0) {
-    return formatString.replace(/\{\{/g, '{').replace(/\}\}/g, '}');
+  ) {
+    return strings.join(separator);
   }
-  return {
-    [ExpressionString]: `format(${valueToString(formatString)}, ${params.join(
-      ',',
-    )})`,
-    toJSON: () =>
-      strings
+  return createExpression(
+    () => {
+      let index = 0;
+      const params: string[] = [];
+      const formatString = strings
+        .map((str) => {
+          switch (typeof str) {
+            case 'string':
+            case 'number':
+            case 'boolean':
+              return str.replace(/\{/g, '{{').replace(/\}/g, '}}');
+            default:
+              params.push(valueToString(str));
+              return `{${index++}}`;
+          }
+        })
+        .join(separator.replace(/\{/g, '{{').replace(/\}/g, '}}'));
+      if (params.length === 0) {
+        return formatString.replace(/\{\{/g, '{').replace(/\}\}/g, '}');
+      }
+      return `format(${valueToString(formatString)}, ${params.join(',')})`;
+    },
+    () => {
+      return strings
         .map((str) => {
           switch (typeof str) {
             case 'string':
@@ -295,9 +315,10 @@ export function joinStrings(
             case 'boolean':
               return str;
             default:
-              return '${{' + valueToString(str) + '}}';
+              return '${{ ' + valueToString(str) + ' }}';
           }
         })
-        .join(separator),
-  };
+        .join(separator);
+    },
+  );
 }

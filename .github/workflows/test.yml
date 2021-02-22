@@ -31,8 +31,8 @@ jobs:
       - name: Enable Cache
         uses: actions/cache@v2
         with:
-          key: ${{runner.os}}-${{matrix.node-version}}-${{hashFiles('package.json',
-            'yarn.lock')}}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package.json',
+            'yarn.lock') }}
           path: node_modules
         id: step_3
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
