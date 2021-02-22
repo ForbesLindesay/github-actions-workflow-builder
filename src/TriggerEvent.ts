@@ -144,6 +144,7 @@ export interface PullRequest {
   created_at: string;
   updated_at: string;
   closed_at: string | null;
+  merged: boolean;
   merged_at: string | null;
   merge_commit_sha: string | null;
   commits_url: string;
