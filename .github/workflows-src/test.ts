@@ -9,11 +9,14 @@ import {
   github,
 } from '../../context';
 import {
+  always,
   eq,
   Expression,
+  failure,
   hashFiles,
   interpolate,
   neq,
+  success,
   toJSON,
 } from '../../expression';
 
@@ -64,6 +67,17 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
   dumpContext('runner', runner);
   dumpContext('strategy', strategy);
   dumpContext('matrix', matrix);
+
+  // sucess is the default, but failure replaces the default
+  when(success(), () => {
+    run(`Success`, `echo sucess`);
+  });
+  when(failure(), () => {
+    run(`Failed`, `echo failed`);
+  });
+  when(always(), () => {
+    run(`Always`, `echo always`);
+  });
 
   when(eq(github.event_name, 'push'), () => {
     run('npx rollingversions publish --dry-run', {

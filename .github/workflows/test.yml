@@ -60,6 +60,15 @@ jobs:
         run: echo $MATRIX_CONTEXT
         env:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+      - name: Success
+        if: ${{ success() }}
+        run: echo sucess
+      - name: Failed
+        if: ${{ failure() }}
+        run: echo failed
+      - name: Always
+        if: ${{ always() }}
+        run: echo always
       - if: ${{ github.event_name == 'push' }}
         run: npx rollingversions publish --dry-run
         env:
