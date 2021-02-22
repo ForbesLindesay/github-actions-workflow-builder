@@ -21,17 +21,19 @@ jobs:
           - 12.x
           - 14.x
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Git Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
       - name: Enable Cache
         uses: actions/cache@v2
         with:
-          path: node_modules
           key: ${{runner.os}}-${{matrix.node-version}}-${{hashFiles('package.json',
             'yarn.lock')}}
+          path: node_modules
         id: step_3
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
         run: yarn install --frozen-lockfile

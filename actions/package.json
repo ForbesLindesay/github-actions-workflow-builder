@@ -1,0 +1,4 @@
+{
+  "main": "../lib/actions.js",
+  "types": "../lib/actions.d.ts"
+}

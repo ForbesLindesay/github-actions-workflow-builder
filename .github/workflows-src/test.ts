@@ -1,4 +1,5 @@
 import createWorkflow, {Job, Steps} from '../../';
+import {cache, checkout, setupNode} from '../../actions';
 import {
   job,
   steps,
@@ -21,20 +22,18 @@ import {
 } from '../../expression';
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
-  return ({use, run, when}) => {
-    const {
-      outputs: {'cache-hit': cacheHit},
-    } = use<{'cache-hit': 'true' | null}>('Enable Cache', 'actions/cache@v2', {
-      with: {
-        path: 'node_modules',
+  return ({add, use, run, when}) => {
+    const {cacheMiss} = add(
+      cache({
         key: interpolate`${runner.os}-${nodeVersion}-${hashFiles(
           'package.json',
           'yarn.lock',
         )}`,
-      },
-    });
+        paths: ['node_modules'],
+      }),
+    );
 
-    when(neq(cacheHit, 'true'), () => {
+    when(cacheMiss, () => {
       run('yarn install --frozen-lockfile');
     });
   };
@@ -44,13 +43,13 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
     'node-version': ['10.x', '12.x', '14.x'],
   })['node-version'];
 
-  use('actions/checkout@v2');
-  use('actions/setup-node@v1', {
-    with: {
-      'node-version': nodeVersion,
-      'registry-url': 'https://registry.npmjs.org',
-    },
-  });
+  add(checkout());
+  add(
+    setupNode({
+      nodeVersion: nodeVersion,
+      registryUrl: 'https://registry.npmjs.org',
+    }),
+  );
 
   add(yarnInstallWithCache(nodeVersion));
 
