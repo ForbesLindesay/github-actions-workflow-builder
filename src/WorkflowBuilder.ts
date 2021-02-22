@@ -34,13 +34,13 @@ export type Job<
 export interface RunStepOptions {
   workingDirectory?: string;
   shell?: 'bash' | 'pwsh' | 'python' | 'sh' | 'cmd' | 'powershell';
-  env?: {[key: string]: Expression<unknown>};
+  env?: {[key: string]: Expression<unknown> | undefined};
   continueOnError?: Expression<boolean>;
   timeoutMinutes?: Expression<number>;
 }
 export interface UseStepOptions {
-  with?: {[key: string]: Expression<unknown>};
-  env?: {[key: string]: Expression<unknown>};
+  with?: {[key: string]: Expression<unknown> | undefined};
+  env?: {[key: string]: Expression<unknown> | undefined};
   continueOnError?: Expression<boolean>;
   timeoutMinutes?: Expression<number>;
 }
@@ -312,19 +312,11 @@ export default function createWorkflow(
             job.strategy = {
               matrix: {
                 ...matrixConfig,
-                ...(options.include !== undefined
-                  ? {include: options.include}
-                  : {}),
-                ...(options.exclude !== undefined
-                  ? {exclude: options.exclude}
-                  : {}),
+                ...optionalObject('include', options.include),
+                ...optionalObject('exclude', options.exclude),
               },
-              ...(options.failFast !== undefined
-                ? {'fail-fast': options.failFast}
-                : {}),
-              ...(options.maxParallel !== undefined
-                ? {'max-parallel': options.maxParallel}
-                : {}),
+              ...optionalObject('fail-fast', options.failFast),
+              ...optionalObject('max-parallel', options.maxParallel),
             };
             return matrix as any;
           },
@@ -356,20 +348,14 @@ export default function createWorkflow(
                 ? [nameOrScript, scriptOrOptions, optionsOrUndefined]
                 : [undefined, nameOrScript, scriptOrOptions];
             const step: any = {
-              ...(name ? {name} : {}),
+              ...optionalObject('name', name),
               ...currentJobCondition(),
               run: script,
-              ...(options?.workingDirectory !== undefined
-                ? {'working-directory': options.workingDirectory}
-                : {}),
-              ...(options?.shell !== undefined ? {shell: options.shell} : {}),
-              ...(options?.env !== undefined ? {env: options.env} : {}),
-              ...(options?.continueOnError !== undefined
-                ? {'continue-on-error': options.continueOnError}
-                : {}),
-              ...(options?.timeoutMinutes !== undefined
-                ? {'timeout-minutes': options.timeoutMinutes}
-                : {}),
+              ...optionalObject('working-directory', options?.workingDirectory),
+              ...optionalObject('shell', options?.shell),
+              ...optionalObject('env', options?.env),
+              ...optionalObject('continue-on-error', options?.continueOnError),
+              ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
             return createContextValue(`steps.${id}`, () => {
@@ -387,17 +373,13 @@ export default function createWorkflow(
                 ? [nameOrScript, scriptOrOptions, optionsOrUndefined]
                 : [undefined, nameOrScript, scriptOrOptions];
             const step: any = {
-              ...(name ? {name} : {}),
+              ...optionalObject('name', name),
               ...currentJobCondition(),
               uses,
-              ...(options?.with !== undefined ? {with: options.with} : {}),
-              ...(options?.env !== undefined ? {env: options.env} : {}),
-              ...(options?.continueOnError !== undefined
-                ? {'continue-on-error': options.continueOnError}
-                : {}),
-              ...(options?.timeoutMinutes !== undefined
-                ? {'timeout-minutes': options.timeoutMinutes}
-                : {}),
+              ...optionalObject('with', options?.with),
+              ...optionalObject('env', options?.env),
+              ...optionalObject('continue-on-error', options?.continueOnError),
+              ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
             return createContextValue(`steps.${id}`, () => {
@@ -431,4 +413,24 @@ export default function createWorkflow(
   } finally {
     creatingWorkflow = false;
   }
+}
+
+function optionalObject(key: string, obj: undefined | any) {
+  if (obj === undefined) {
+    return {};
+  }
+
+  if (typeof obj !== 'object' || obj === null) {
+    return {[key]: obj};
+  }
+
+  if (!Object.values(obj).some((v) => v !== undefined)) {
+    return {};
+  }
+
+  return {
+    [key]: Object.fromEntries(
+      Object.entries(obj).filter(([_key, value]) => value !== undefined),
+    ),
+  };
 }

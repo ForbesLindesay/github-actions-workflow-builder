@@ -7,6 +7,7 @@
     "github-actions-workflow-builder": "./lib/cli.js"
   },
   "files": [
+    "actions/",
     "context/",
     "expression/",
     "lib/"

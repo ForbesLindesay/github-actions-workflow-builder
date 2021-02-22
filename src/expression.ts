@@ -249,22 +249,55 @@ export function failure(): Expression<boolean> {
 export function interpolate(
   strings: TemplateStringsArray,
   ...parameters: Expression<string>[]
-): string {
-  let result = '';
+): Expression<string> {
+  const result: Expression<string>[] = [];
   for (let i = 0; i < strings.length; i++) {
-    result += strings[i];
+    result.push(strings[i]);
     if (i < parameters.length) {
-      switch (typeof parameters[i]) {
+      result.push(parameters[i]);
+    }
+  }
+  return joinStrings(result, '');
+}
+
+export function joinStrings(
+  strings: Expression<string>[],
+  separator: string = ',',
+): Expression<string> {
+  let index = 0;
+  const params: string[] = [];
+  const formatString = strings
+    .map((str) => {
+      switch (typeof str) {
         case 'string':
         case 'number':
         case 'boolean':
-          result += parameters[i];
-          break;
+          return str.replace(/\{/g, '{{').replace(/\}/g, '}}');
         default:
-          result += '${{' + valueToString(parameters[i]) + '}}';
-          break;
+          params.push(valueToString(str));
+          return `{${index++}}`;
       }
-    }
+    })
+    .join(separator.replace(/\{/g, '{{').replace(/\}/g, '}}'));
+  if (params.length === 0) {
+    return formatString.replace(/\{\{/g, '{').replace(/\}\}/g, '}');
   }
-  return result;
+  return {
+    [ExpressionString]: `format(${valueToString(formatString)}, ${params.join(
+      ',',
+    )})`,
+    toJSON: () =>
+      strings
+        .map((str) => {
+          switch (typeof str) {
+            case 'string':
+            case 'number':
+            case 'boolean':
+              return str;
+            default:
+              return '${{' + valueToString(str) + '}}';
+          }
+        })
+        .join(separator),
+  };
 }

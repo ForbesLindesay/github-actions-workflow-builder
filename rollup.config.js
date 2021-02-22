@@ -7,6 +7,7 @@ import pkg from './package.json';
 
 export default {
   input: {
+    actions: 'src/actions.ts',
     expression: 'src/expression.ts',
     context: 'src/context.ts',
     index: 'src/index.ts',
