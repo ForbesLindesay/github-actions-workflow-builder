@@ -62,11 +62,11 @@ export interface JobContext {
       | string,
   ): void;
   setContainer(container: {
-    image: Expression<'string'>;
-    env?: {[key in string]?: Expression<'string'>};
+    image: Expression<string>;
+    env?: {[key in string]?: Expression<string>};
     [key: string]: any;
   }): void;
-  setEnv(name: string, value: Expression<'string'>): void;
+  setEnv(name: string, value: Expression<string>): void;
   /**
    * Defaults to 360
    */
@@ -91,8 +91,8 @@ export interface JobContext {
     name?: string;
     ports?: Expression<string>[];
     credentials?: {username: Expression<string>; password: Expression<string>};
-    env?: {[key in string]?: Expression<'string'>};
-    volumes?: Expression<'string'>[];
+    env?: {[key in string]?: Expression<string>};
+    volumes?: Expression<string>[];
     options?: any;
   }): void;
 
@@ -100,16 +100,17 @@ export interface JobContext {
     job: JobReference<TJobOutputs>,
     ...jobs: JobReference<unknown>[]
   ): ContextValue<NeedsJobContext<TJobOutputs>>;
+  addDependencies(...jobs: JobReference<unknown>[]): unknown;
 
   add<TStepOutput>(step: Steps<TStepOutput>): TStepOutput;
 
-  run<TStepOutput>(
-    script: string,
+  run<TStepOutput = {}>(
+    script: Expression<string>,
     options?: RunStepOptions,
   ): ContextValue<StepContext<TStepOutput>>;
   run<TStepOutput = {}>(
     stepName: string,
-    script: string,
+    script: Expression<string>,
     options?: RunStepOptions,
   ): ContextValue<StepContext<TStepOutput>>;
   use<TStepOutput = {}>(
@@ -326,13 +327,14 @@ export default function createWorkflow(
             }
             job.services[name] = config;
           },
-          addDependencies(dependency, ...otherDependencies) {
+          addDependencies(...dependencies: readonly JobReference<unknown>[]) {
             if (!job.needs) job.needs = [];
-            job.needs.push(dependency.name);
-            for (const {name} of otherDependencies) {
+            for (const {name} of dependencies) {
               job.needs.push(name);
             }
-            return needs[dependency.name] as any;
+            return dependencies.length
+              ? (needs[dependencies[0].name] as any)
+              : undefined;
           },
           add(steps) {
             return steps(jobContext);
@@ -409,7 +411,12 @@ export default function createWorkflow(
         return {name: jobName};
       },
     });
-    return sortKeys(workflow, ['name', 'on', 'env', 'deults', 'jobs']);
+    const w = sortKeys(workflow, ['name', 'on', 'env', 'deults', 'jobs']);
+    // We need to stringify the workflow to generate all necessary step IDs
+    // The first pass at stringifying won't have all IDs initialized, but future
+    // stringifies will.
+    JSON.stringify(w);
+    return w;
   } finally {
     creatingWorkflow = false;
   }

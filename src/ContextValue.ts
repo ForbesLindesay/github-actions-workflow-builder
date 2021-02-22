@@ -28,9 +28,14 @@ export default function createContextValue<T>(
   onAccess?: () => void,
 ): ContextValue<T> {
   const getProp = (key: string | number | symbol): any => {
-    if (onAccess) onAccess();
-    if (key === ContextValueString) return () => path;
-    if (key === 'toJSON') return () => '${{ ' + path + ' }}';
+    if (key === ContextValueString) {
+      if (onAccess) onAccess();
+      return () => path;
+    }
+    if (key === 'toJSON' || key === 'toString') {
+      if (onAccess) onAccess();
+      return () => '${{ ' + path + ' }}';
+    }
 
     if (typeof key === 'number') {
       return getProp(JSON.stringify(key));
@@ -38,12 +43,15 @@ export default function createContextValue<T>(
     if (typeof key === 'string') {
       if (key === '*') {
         // returns an array
-        return createContextValue<any>(`${path}.${key}`);
+        return createContextValue<any>(`${path}.${key}`, onAccess);
       }
       if (/^[a-z_][a-z0-9-_]+$/i.test(key)) {
-        return createContextValue<any>(`${path}.${key}`);
+        return createContextValue<any>(`${path}.${key}`, onAccess);
       }
-      return createContextValue<any>(`${path}['${key.replace(/\'/g, `''`)}']`);
+      return createContextValue<any>(
+        `${path}['${key.replace(/\'/g, `''`)}']`,
+        onAccess,
+      );
     }
     return undefined;
   };
