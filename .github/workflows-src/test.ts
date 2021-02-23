@@ -60,6 +60,11 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
     interpolate`echo "node version = ${nodeVersion}"`,
   );
 
+  run(
+    `Print using nested interpolation`,
+    interpolate`echo "${interpolate`node version = ${nodeVersion}`}"`,
+  );
+
   function dumpContext(name: string, context: Expression<unknown>) {
     run(`Dump ${name} context`, `echo $${name.toUpperCase()}_CONTEXT`, {
       env: {[`${name.toUpperCase()}_CONTEXT`]: toJSON(context)},

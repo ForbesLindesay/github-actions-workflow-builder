@@ -5,6 +5,7 @@ export {ContextValue};
 const ExpressionString = Symbol('expressionString');
 const ExpressionType = Symbol('expressionType');
 const JsonStringType = Symbol('jsonStringType');
+const JoinExpressionParts = Symbol('JoinExpressionParts');
 export type ComplexExpression<T> = {
   readonly [ExpressionString]: () => string;
   readonly [ExpressionType]?: T;
@@ -21,6 +22,11 @@ export type Expression<T> =
 
 export type JsonExpression<T> = ComplexExpression<string> & {
   readonly [JsonStringType]?: T;
+};
+export type JoinExpression = ComplexExpression<string> & {
+  readonly [JoinExpressionParts]: readonly Expression<
+    string | number | boolean
+  >[];
 };
 
 function createExpression<T>(
@@ -41,6 +47,12 @@ export function isComplexExpression(
     typeof expression === 'object' &&
     !!expression &&
     typeof (expression as any)[ExpressionString] === 'function'
+  );
+}
+function isJoinExpression(expression: unknown): expression is JoinExpression {
+  return (
+    isComplexExpression(expression) &&
+    Array.isArray((expression as any)[JoinExpressionParts])
   );
 }
 
@@ -254,9 +266,9 @@ export function failure(): Expression<boolean> {
 
 export function interpolate(
   strings: TemplateStringsArray,
-  ...parameters: Expression<string>[]
+  ...parameters: Expression<string | number | boolean>[]
 ): Expression<string> {
-  const result: Expression<string>[] = [];
+  const result: Expression<string | number | boolean>[] = [];
   for (let i = 0; i < strings.length; i++) {
     result.push(strings[i]);
     if (i < parameters.length) {
@@ -267,58 +279,62 @@ export function interpolate(
 }
 
 export function joinStrings(
-  strings: Expression<string>[],
+  strings: Expression<string | number | boolean>[],
   separator: string = ',',
 ): Expression<string> {
-  if (
-    strings.every((str) => {
-      switch (typeof str) {
-        case 'string':
-        case 'number':
-        case 'boolean':
-          return true;
-        default:
-          return false;
-      }
-    })
-  ) {
-    return strings.join(separator);
+  const parts: Expression<string | number | boolean>[] = [];
+  for (let i = 0; i < strings.length; i++) {
+    if (i !== 0) {
+      parts.push(separator);
+    }
+    const str = strings[i];
+    if (isJoinExpression(str)) {
+      parts.push(...str[JoinExpressionParts]);
+    } else {
+      parts.push(str);
+    }
   }
-  return createExpression(
-    () => {
-      let index = 0;
-      const params: string[] = [];
-      const formatString = strings
-        .map((str) => {
-          switch (typeof str) {
-            case 'string':
-            case 'number':
-            case 'boolean':
-              return str.replace(/\{/g, '{{').replace(/\}/g, '}}');
-            default:
-              params.push(valueToString(str));
-              return `{${index++}}`;
-          }
-        })
-        .join(separator.replace(/\{/g, '{{').replace(/\}/g, '}}'));
-      if (params.length === 0) {
-        return formatString.replace(/\{\{/g, '{').replace(/\}\}/g, '}');
-      }
-      return `format(${valueToString(formatString)}, ${params.join(',')})`;
-    },
-    () => {
-      return strings
-        .map((str) => {
-          switch (typeof str) {
-            case 'string':
-            case 'number':
-            case 'boolean':
-              return str;
-            default:
-              return '${{ ' + valueToString(str) + ' }}';
-          }
-        })
-        .join(separator);
-    },
+
+  if (parts.every((str) => typeof str === 'string')) {
+    return parts.join('');
+  }
+  return Object.assign(
+    createExpression<string>(
+      () => {
+        let index = 0;
+        const params: string[] = [];
+        const formatString = parts
+          .map((str) => {
+            switch (typeof str) {
+              case 'number':
+              case 'boolean':
+                return `${str}`;
+              case 'string':
+                return str.replace(/\{/g, '{{').replace(/\}/g, '}}');
+              default:
+                params.push(valueToString(str));
+                return `{${index++}}`;
+            }
+          })
+          .join('');
+        return `format(${valueToString(formatString)}, ${params.join(',')})`;
+      },
+      () => {
+        return parts
+          .map((str) => {
+            switch (typeof str) {
+              case 'number':
+              case 'boolean':
+                return `${str}`;
+              case 'string':
+                return str;
+              default:
+                return '${{ ' + valueToString(str) + ' }}';
+            }
+          })
+          .join('');
+      },
+    ),
+    {[JoinExpressionParts]: parts},
   );
 }

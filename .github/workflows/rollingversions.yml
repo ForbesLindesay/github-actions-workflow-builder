@@ -37,6 +37,8 @@ jobs:
       - run: yarn build
       - name: Print node.js version
         run: echo "node version = ${{ matrix.node-version }}"
+      - name: Print using nested interpolation
+        run: echo "node version = ${{ matrix.node-version }}"
       - name: Dump github_event context
         run: echo $GITHUB_EVENT_CONTEXT
         env:
