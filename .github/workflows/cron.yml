@@ -1,0 +1,14 @@
+# !!! This file is auto-generated, do not edit by hand !!!
+# To make changes, edit .github/workflows-src/cron.ts and then run:
+#
+#   github-actions-workflow-builder --directory ".github/workflows-src""
+
+name: CRON
+on:
+  schedule:
+    - cron: 0 18 * * *
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hello world"

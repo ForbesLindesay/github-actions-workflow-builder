@@ -190,7 +190,7 @@ export type WorkflowTriggerEvent<TConfig, TPayload> = (
 ) => TPayload;
 
 export interface TriggerEvents {
-  schedule: WorkflowTriggerEvent<{cron: string}, {}>;
+  schedule: WorkflowTriggerEvent<[{cron: string}, ...{cron: string}[]], {}>;
   workflow_dispatch: WorkflowTriggerEvent<
     {
       [name: string]: {
