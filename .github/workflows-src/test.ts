@@ -104,4 +104,62 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   addTrigger('pull_request', {branches: ['master']});
 
   addJob('test', TEST_JOB);
+  const testOutputs = addJob('test_outputs', ({run}) => {
+    const {outputs: s} = run<{true_output: string; false_output: string}>(
+      'String Outputs',
+      `echo "::set-output name=true_output::true" && echo "::set-output name=false_output::false"`,
+    );
+    const {outputs: j} = run<{true_output: boolean; false_output: boolean}>(
+      'JSON Outputs',
+      `echo "::set-output name=true_output::true" && echo "::set-output name=false_output::false"`,
+      {jsonOutputs: true},
+    );
+
+    return {
+      amazingString: '{{ something something }}',
+      stringTrue: 'true',
+      stringFalse: 'false',
+      booleanTrue: eq('true', 'true'),
+      booleanFalse: eq('false', 'true'),
+      stringCmdTrue: s.true_output,
+      stringCmdFalse: s.false_output,
+      booleanCmdTrue: j.true_output,
+      booleanCmdFalse: j.false_output,
+    };
+  });
+  addJob('test_needs', ({run, addDependencies, when}) => {
+    const {outputs} = addDependencies(testOutputs);
+    run(interpolate`echo "${outputs.amazingString}"`);
+    when(outputs.stringTrue as any, () => {
+      run('echo "string true"');
+    });
+    when(outputs.stringFalse as any, () => {
+      run('echo "string false"');
+    });
+    when(outputs.booleanTrue as any, () => {
+      run('echo "boolean true"');
+    });
+    when(outputs.booleanFalse as any, () => {
+      run('echo "boolean false"');
+    });
+    when(outputs.stringCmdTrue as any, () => {
+      run('echo "string cmd true"');
+    });
+    when(outputs.stringCmdFalse as any, () => {
+      run('echo "string cmd false"');
+    });
+    when(outputs.booleanCmdTrue as any, () => {
+      run('echo "boolean cmd true"');
+    });
+    when(outputs.booleanCmdFalse as any, () => {
+      run('echo "boolean cmd false"');
+    });
+    return {
+      amazingString: outputs.amazingString,
+      stringTrue: outputs.stringTrue,
+      stringFalse: outputs.stringFalse,
+      booleanTrue: outputs.booleanTrue,
+      booleanFalse: outputs.booleanFalse,
+    };
+  });
 });

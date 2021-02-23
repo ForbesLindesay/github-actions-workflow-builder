@@ -80,3 +80,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  test_outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: String Outputs
+        run: echo "::set-output name=true_output::true" && echo "::set-output
+          name=false_output::false"
+        id: step_1
+      - name: JSON Outputs
+        run: echo "::set-output name=true_output::true" && echo "::set-output
+          name=false_output::false"
+        id: step_2
+    outputs:
+      amazingString: ${{ toJSON('{{ something something }}') }}
+      stringTrue: ${{ toJSON('true') }}
+      stringFalse: ${{ toJSON('false') }}
+      booleanTrue: ${{ toJSON('true' == 'true') }}
+      booleanFalse: ${{ toJSON('false' == 'true') }}
+      stringCmdTrue: ${{ toJSON(steps.step_1.outputs.true_output) }}
+      stringCmdFalse: ${{ toJSON(steps.step_1.outputs.false_output) }}
+      booleanCmdTrue: ${{ steps.step_2.outputs.true_output }}
+      booleanCmdFalse: ${{ steps.step_2.outputs.false_output }}
+  test_needs:
+    needs:
+      - test_outputs
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ fromJSON(needs.test_outputs.outputs.amazingString) }}"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringTrue) }}
+        run: echo "string true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringFalse) }}
+        run: echo "string false"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanTrue) }}
+        run: echo "boolean true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanFalse) }}
+        run: echo "boolean false"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringCmdTrue) }}
+        run: echo "string cmd true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringCmdFalse) }}
+        run: echo "string cmd false"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanCmdTrue) }}
+        run: echo "boolean cmd true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanCmdFalse) }}
+        run: echo "boolean cmd false"
+    outputs:
+      amazingString: ${{ needs.test_outputs.outputs.amazingString }}
+      stringTrue: ${{ needs.test_outputs.outputs.stringTrue }}
+      stringFalse: ${{ needs.test_outputs.outputs.stringFalse }}
+      booleanTrue: ${{ needs.test_outputs.outputs.booleanTrue }}
+      booleanFalse: ${{ needs.test_outputs.outputs.booleanFalse }}

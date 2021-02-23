@@ -5,6 +5,7 @@ import {
   eq,
   Expression,
   isComplexExpression,
+  toJSON,
 } from './expression';
 import createContextValue, {isContextValue} from './ContextValue';
 import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
@@ -38,6 +39,7 @@ export type Job<
 }: JobContext) => TJobOutput;
 
 export interface RunStepOptions {
+  jsonOutputs?: boolean;
   workingDirectory?: string;
   shell?: 'bash' | 'pwsh' | 'python' | 'sh' | 'cmd' | 'powershell';
   env?: {[key: string]: Expression<unknown> | undefined};
@@ -45,6 +47,7 @@ export interface RunStepOptions {
   timeoutMinutes?: Expression<number>;
 }
 export interface UseStepOptions {
+  jsonOutputs?: boolean;
   with?: {[key: string]: Expression<unknown> | undefined};
   env?: {[key: string]: Expression<unknown> | undefined};
   continueOnError?: Expression<boolean>;
@@ -368,8 +371,11 @@ export default function createWorkflow(
               ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
-            return createContextValue(`steps.${id}`, () => {
-              step.id = id;
+            return createContextValue([`steps`, id], {
+              jsonDepth: options?.jsonOutputs ? 4 : undefined,
+              onAccess: () => {
+                step.id = id;
+              },
             });
           }) as any,
           use: ((
@@ -392,14 +398,24 @@ export default function createWorkflow(
               ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
-            return createContextValue(`steps.${id}`, () => {
-              step.id = id;
+            return createContextValue([`steps`, id], {
+              jsonDepth: options?.jsonOutputs ? 4 : undefined,
+              onAccess: () => {
+                step.id = id;
+              },
             });
           }) as any,
         };
         const outputs = fn(jobContext);
-        if (outputs) {
-          job.outputs = outputs;
+        if (
+          outputs &&
+          Object.values(outputs as any).some((o) => o !== undefined)
+        ) {
+          job.outputs = Object.fromEntries(
+            Object.entries(outputs as any)
+              .filter(([, value]) => value !== undefined)
+              .map(([key, value]) => [key, toJSON(value as any)]),
+          );
         }
         workflow.jobs[jobName] = sortKeys(job, [
           'name',

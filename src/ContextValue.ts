@@ -23,35 +23,52 @@ export function contextValueString<T>(proxy: ContextValue<T>): string {
   return proxy[ContextValueString]();
 }
 
+const pathStr = (path: string[], jsonDepth?: number) => {
+  let start: string;
+  let rest: string[];
+  if (jsonDepth !== undefined && path.length >= jsonDepth) {
+    start = `fromJSON(${pathStr(path.slice(0, jsonDepth))})`;
+    rest = path.slice(jsonDepth);
+  } else {
+    start = path[0];
+    rest = path.slice(1);
+  }
+  return (
+    start +
+    rest
+      .map((key) => {
+        if (key === '*') {
+          // returns an array
+          return `.${key}`;
+        }
+        if (/^[a-z_][a-z0-9-_]+$/i.test(key)) {
+          return `.${key}`;
+        }
+        return `['${key.replace(/\'/g, `''`)}']`;
+      })
+      .join(``)
+  );
+};
+
 export default function createContextValue<T>(
-  path: string,
-  onAccess?: () => void,
+  path: string[],
+  {jsonDepth, onAccess}: {jsonDepth?: number; onAccess?: () => void} = {},
 ): ContextValue<T> {
   const getProp = (key: string | number | symbol): any => {
     if (key === ContextValueString) {
       if (onAccess) onAccess();
-      return () => path;
+      return () => pathStr(path, jsonDepth);
     }
     if (key === 'toJSON' || key === 'toString') {
       if (onAccess) onAccess();
-      return () => '${{ ' + path + ' }}';
+      return () => '${{ ' + pathStr(path, jsonDepth) + ' }}';
     }
 
     if (typeof key === 'number') {
       return getProp(JSON.stringify(key));
     }
     if (typeof key === 'string') {
-      if (key === '*') {
-        // returns an array
-        return createContextValue<any>(`${path}.${key}`, onAccess);
-      }
-      if (/^[a-z_][a-z0-9-_]+$/i.test(key)) {
-        return createContextValue<any>(`${path}.${key}`, onAccess);
-      }
-      return createContextValue<any>(
-        `${path}['${key.replace(/\'/g, `''`)}']`,
-        onAccess,
-      );
+      return createContextValue<any>([...path, key], {jsonDepth, onAccess});
     }
     return undefined;
   };

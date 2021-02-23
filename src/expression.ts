@@ -234,7 +234,49 @@ export function join(
 }
 
 export function toJSON<T>(value: Expression<T>): JsonExpression<T> {
-  return createExpression(() => `toJSON(${valueToString(value)})`);
+  return createExpression(() => {
+    const str = valueToString(value);
+    if (str.startsWith('fromJSON(') && str.endsWith(')')) {
+      // simplify `toJSON(fromJSON(v))`
+      let isBalanced = true;
+      const stack: string[] = [];
+      const innerStr = str.substring('fromJSON('.length, str.length - 1);
+      for (const c of innerStr) {
+        switch (c) {
+          case '"':
+          case "'":
+            if (stack.length && stack[stack.length - 1] === c) {
+              stack.pop();
+            } else {
+              stack.push(c);
+            }
+            break;
+          case '(':
+            stack.push(')');
+            break;
+          case '{':
+            stack.push('}');
+            break;
+          case ')':
+          case '}':
+            if (!stack.length) {
+              isBalanced = false;
+              break;
+            }
+            const expected = stack.pop();
+            if (expected !== c) {
+              isBalanced = false;
+              break;
+            }
+            break;
+        }
+      }
+      if (isBalanced && stack.length === 0) {
+        return innerStr;
+      }
+    }
+    return `toJSON(${str})`;
+  });
 }
 
 export function fromJSON<T>(value: JsonExpression<T>): Expression<T>;
