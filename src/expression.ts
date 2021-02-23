@@ -34,7 +34,7 @@ function createExpression<T>(
   };
 }
 
-function isComplexExpression(
+export function isComplexExpression(
   expression: unknown,
 ): expression is ComplexExpression<unknown> {
   return (
