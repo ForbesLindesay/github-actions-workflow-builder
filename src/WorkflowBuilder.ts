@@ -39,6 +39,7 @@ export type Job<
 }: JobContext) => TJobOutput;
 
 export interface RunStepOptions {
+  jsonOutputs?: boolean;
   workingDirectory?: string;
   shell?: 'bash' | 'pwsh' | 'python' | 'sh' | 'cmd' | 'powershell';
   env?: {[key: string]: Expression<unknown> | undefined};
@@ -46,6 +47,7 @@ export interface RunStepOptions {
   timeoutMinutes?: Expression<number>;
 }
 export interface UseStepOptions {
+  jsonOutputs?: boolean;
   with?: {[key: string]: Expression<unknown> | undefined};
   env?: {[key: string]: Expression<unknown> | undefined};
   continueOnError?: Expression<boolean>;
@@ -369,8 +371,11 @@ export default function createWorkflow(
               ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
-            return createContextValue(`steps.${id}`, () => {
-              step.id = id;
+            return createContextValue([`steps`, id], {
+              jsonDepth: options?.jsonOutputs ? 4 : undefined,
+              onAccess: () => {
+                step.id = id;
+              },
             });
           }) as any,
           use: ((
@@ -393,8 +398,11 @@ export default function createWorkflow(
               ...optionalObject('timeout-minutes', options?.timeoutMinutes),
             };
             job.steps.push(step);
-            return createContextValue(`steps.${id}`, () => {
-              step.id = id;
+            return createContextValue([`steps`, id], {
+              jsonDepth: options?.jsonOutputs ? 4 : undefined,
+              onAccess: () => {
+                step.id = id;
+              },
             });
           }) as any,
         };

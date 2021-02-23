@@ -105,13 +105,26 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   addJob('test', TEST_JOB);
   const testOutputs = addJob('test_outputs', ({run}) => {
-    run('echo "hello world"');
+    const {outputs: s} = run<{true_output: string; false_output: string}>(
+      'String Outputs',
+      `echo "::set-output name=true_output::true" && echo "::set-output name=false_output::false"`,
+    );
+    const {outputs: j} = run<{true_output: boolean; false_output: boolean}>(
+      'JSON Outputs',
+      `echo "::set-output name=true_output::true" && echo "::set-output name=false_output::false"`,
+      {jsonOutputs: true},
+    );
+
     return {
       amazingString: '{{ something something }}',
       stringTrue: 'true',
       stringFalse: 'false',
       booleanTrue: eq('true', 'true'),
       booleanFalse: eq('false', 'true'),
+      stringCmdTrue: s.true_output,
+      stringCmdFalse: s.false_output,
+      booleanCmdTrue: j.true_output,
+      booleanCmdFalse: j.false_output,
     };
   });
   addJob('test_needs', ({run, addDependencies, when}) => {
@@ -128,6 +141,18 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     });
     when(outputs.booleanFalse as any, () => {
       run('echo "boolean false"');
+    });
+    when(outputs.stringCmdTrue as any, () => {
+      run('echo "string cmd true"');
+    });
+    when(outputs.stringCmdFalse as any, () => {
+      run('echo "string cmd false"');
+    });
+    when(outputs.booleanCmdTrue as any, () => {
+      run('echo "boolean cmd true"');
+    });
+    when(outputs.booleanCmdFalse as any, () => {
+      run('echo "boolean cmd false"');
     });
     return {
       amazingString: outputs.amazingString,

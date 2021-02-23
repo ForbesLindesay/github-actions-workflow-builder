@@ -1,7 +1,4 @@
-import createContextValue, {
-  ContextValue,
-  createNeedsValue,
-} from './ContextValue';
+import createContextValue, {ContextValue} from './ContextValue';
 import {TriggerEvents} from './TriggerEvent';
 
 export type Result = 'success' | 'failure' | 'cancelled' | 'skipped';
@@ -39,12 +36,14 @@ export interface GitHubContext<
   workflow: string;
   workspace: string;
 }
-export const github: ContextValue<GitHubContext> = createContextValue('github');
+export const github: ContextValue<GitHubContext> = createContextValue([
+  'github',
+]);
 
 export interface EnvContext {
   [key: string]: string;
 }
-export const env: ContextValue<EnvContext> = createContextValue('env');
+export const env: ContextValue<EnvContext> = createContextValue(['env']);
 
 export interface JobContext {
   container: {
@@ -56,7 +55,7 @@ export interface JobContext {
   };
   status: 'success' | 'failure' | 'cancelled';
 }
-export const job: ContextValue<JobContext> = createContextValue('job');
+export const job: ContextValue<JobContext> = createContextValue(['job']);
 
 export interface StepContext<TOutputs = {[key: string]: string}> {
   conclusion: Result;
@@ -66,14 +65,16 @@ export interface StepContext<TOutputs = {[key: string]: string}> {
 export interface StepsContext {
   [key: string]: StepContext;
 }
-export const steps: ContextValue<StepsContext> = createContextValue('steps');
+export const steps: ContextValue<StepsContext> = createContextValue(['steps']);
 
 export interface RunnerContext {
   os: 'Linux' | 'Windows' | 'macOS';
   temp: string;
   tool_cache: string;
 }
-export const runner: ContextValue<RunnerContext> = createContextValue('runner');
+export const runner: ContextValue<RunnerContext> = createContextValue([
+  'runner',
+]);
 
 export interface NeedsJobContext<TOutputs = {}> {
   outputs: TOutputs;
@@ -85,23 +86,27 @@ export interface Needs {
     result: Result;
   };
 }
-export const needs: ContextValue<Needs> = createNeedsValue(['needs']);
+export const needs: ContextValue<Needs> = createContextValue(['needs'], {
+  jsonDepth: 4,
+});
 
 export interface SecretsContext {
   [key: string]: string;
 }
-export const secrets: ContextValue<SecretsContext> = createContextValue(
+export const secrets: ContextValue<SecretsContext> = createContextValue([
   'secrets',
-);
+]);
 
 export interface StrategyContext {
   [key: string]: any;
 }
-export const strategy: ContextValue<StrategyContext> = createContextValue(
+export const strategy: ContextValue<StrategyContext> = createContextValue([
   'strategy',
-);
+]);
 
 interface MatrixContext {
   [key: string]: string;
 }
-export const matrix: ContextValue<MatrixContext> = createContextValue('matrix');
+export const matrix: ContextValue<MatrixContext> = createContextValue([
+  'matrix',
+]);
