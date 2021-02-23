@@ -29,7 +29,7 @@ function createExpression<T>(str: string): ComplexExpression<T> {
   };
 }
 
-function isComplexExpression(
+export function isComplexExpression(
   expression: unknown,
 ): expression is ComplexExpression<unknown> {
   return (

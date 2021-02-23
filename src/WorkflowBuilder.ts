@@ -1,6 +1,12 @@
 import {github, matrix, needs, NeedsJobContext, StepContext} from './context';
-import {and, ContextValue, eq, Expression} from './expression';
-import createContextValue from './ContextValue';
+import {
+  and,
+  ContextValue,
+  eq,
+  Expression,
+  isComplexExpression,
+} from './expression';
+import createContextValue, {isContextValue} from './ContextValue';
 import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
 import sortKeys from './sortKeys';
 
@@ -420,7 +426,12 @@ function optionalObject(key: string, obj: undefined | any) {
     return {};
   }
 
-  if (typeof obj !== 'object' || obj === null) {
+  if (
+    typeof obj !== 'object' ||
+    obj === null ||
+    isContextValue(obj) ||
+    isComplexExpression(obj)
+  ) {
     return {[key]: obj};
   }
 
