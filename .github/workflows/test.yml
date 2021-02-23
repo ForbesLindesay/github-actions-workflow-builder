@@ -80,3 +80,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  test_outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hello world"
+    outputs:
+      amazingString: ${{ toJSON('{{ something something }}') }}
+      stringTrue: ${{ toJSON('true') }}
+      stringFalse: ${{ toJSON('false') }}
+      booleanTrue: ${{ toJSON('true' == 'true') }}
+      booleanFalse: ${{ toJSON('false' == 'true') }}
+  test_needs:
+    needs:
+      - test_outputs
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ fromJSON(needs.test_outputs.outputs.amazingString) }}"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringTrue) }}
+        run: echo "string true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.stringFalse) }}
+        run: echo "string false"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanTrue) }}
+        run: echo "boolean true"
+      - if: ${{ fromJSON(needs.test_outputs.outputs.booleanFalse) }}
+        run: echo "boolean false"
+    outputs:
+      amazingString: ${{ toJSON(fromJSON(needs.test_outputs.outputs.amazingString)) }}
+      stringTrue: ${{ toJSON(fromJSON(needs.test_outputs.outputs.stringTrue)) }}
+      stringFalse: ${{ toJSON(fromJSON(needs.test_outputs.outputs.stringFalse)) }}
+      booleanTrue: ${{ toJSON(fromJSON(needs.test_outputs.outputs.booleanTrue)) }}
+      booleanFalse: ${{ toJSON(fromJSON(needs.test_outputs.outputs.booleanFalse)) }}

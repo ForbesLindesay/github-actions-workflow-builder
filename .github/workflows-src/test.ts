@@ -104,4 +104,37 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   addTrigger('pull_request', {branches: ['master']});
 
   addJob('test', TEST_JOB);
+  const testOutputs = addJob('test_outputs', ({run}) => {
+    run('echo "hello world"');
+    return {
+      amazingString: '{{ something something }}',
+      stringTrue: 'true',
+      stringFalse: 'false',
+      booleanTrue: eq('true', 'true'),
+      booleanFalse: eq('false', 'true'),
+    };
+  });
+  addJob('test_needs', ({run, addDependencies, when}) => {
+    const {outputs} = addDependencies(testOutputs);
+    run(interpolate`echo "${outputs.amazingString}"`);
+    when(outputs.stringTrue as any, () => {
+      run('echo "string true"');
+    });
+    when(outputs.stringFalse as any, () => {
+      run('echo "string false"');
+    });
+    when(outputs.booleanTrue as any, () => {
+      run('echo "boolean true"');
+    });
+    when(outputs.booleanFalse as any, () => {
+      run('echo "boolean false"');
+    });
+    return {
+      amazingString: outputs.amazingString,
+      stringTrue: outputs.stringTrue,
+      stringFalse: outputs.stringFalse,
+      booleanTrue: outputs.booleanTrue,
+      booleanFalse: outputs.booleanFalse,
+    };
+  });
 });

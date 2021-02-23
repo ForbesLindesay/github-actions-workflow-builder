@@ -5,6 +5,7 @@ import {
   eq,
   Expression,
   isComplexExpression,
+  toJSON,
 } from './expression';
 import createContextValue, {isContextValue} from './ContextValue';
 import {TriggerEvents, WorkflowTriggerEvent} from './TriggerEvent';
@@ -398,8 +399,15 @@ export default function createWorkflow(
           }) as any,
         };
         const outputs = fn(jobContext);
-        if (outputs) {
-          job.outputs = outputs;
+        if (
+          outputs &&
+          Object.values(outputs as any).some((o) => o !== undefined)
+        ) {
+          job.outputs = Object.fromEntries(
+            Object.entries(outputs as any)
+              .filter(([, value]) => value !== undefined)
+              .map(([key, value]) => [key, toJSON(value as any)]),
+          );
         }
         workflow.jobs[jobName] = sortKeys(job, [
           'name',

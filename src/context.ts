@@ -1,4 +1,7 @@
-import createContextValue, {ContextValue} from './ContextValue';
+import createContextValue, {
+  ContextValue,
+  createNeedsValue,
+} from './ContextValue';
 import {TriggerEvents} from './TriggerEvent';
 
 export type Result = 'success' | 'failure' | 'cancelled' | 'skipped';
@@ -72,17 +75,17 @@ export interface RunnerContext {
 }
 export const runner: ContextValue<RunnerContext> = createContextValue('runner');
 
-export interface NeedsJobContext<TOutputs = {[name: string]: string}> {
+export interface NeedsJobContext<TOutputs = {}> {
   outputs: TOutputs;
   result: Result;
 }
 export interface Needs {
   [jobID: string]: {
-    outputs: NeedsJobContext;
+    outputs: NeedsJobContext<{[key: string]: string}>;
     result: Result;
   };
 }
-export const needs: ContextValue<Needs> = createContextValue('needs');
+export const needs: ContextValue<Needs> = createNeedsValue(['needs']);
 
 export interface SecretsContext {
   [key: string]: string;

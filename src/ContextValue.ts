@@ -92,3 +92,68 @@ export default function createContextValue<T>(
     },
   );
 }
+
+export function createNeedsValue<T>(path: string[]): ContextValue<T> {
+  if (path.length === 4) {
+    // needs.job_name.outputs.output_name
+    return createContextValue(`fromJSON(${path.join('')})`);
+  }
+  const getProp = (key: string | number | symbol): any => {
+    if (key === ContextValueString) {
+      return () => path.join('');
+    }
+    if (key === 'toJSON' || key === 'toString') {
+      return () => '${{ ' + path.join('') + ' }}';
+    }
+
+    if (typeof key === 'number') {
+      return getProp(JSON.stringify(key));
+    }
+    if (typeof key === 'string') {
+      if (/^[a-z_][a-z0-9-_]+$/i.test(key)) {
+        return createNeedsValue<any>([...path, `.${key}`]);
+      }
+      return createNeedsValue<any>([
+        ...path,
+        `['${key.replace(/\'/g, `''`)}']`,
+      ]);
+    }
+    return undefined;
+  };
+  return new Proxy<any>(
+    {},
+    {
+      get(_target, key) {
+        return getProp(key);
+      },
+      set() {
+        throw new Error('Cannot set on ContextValue');
+      },
+      deleteProperty() {
+        throw new Error('Cannot delete on ContextValue');
+      },
+      enumerate() {
+        throw new Error('Cannot get keys on ContextValue');
+      },
+      ownKeys() {
+        throw new Error('Cannot get keys on ContextValue');
+      },
+      has(_target, key) {
+        return getProp(key) !== undefined;
+      },
+      defineProperty() {
+        throw new Error('Cannot defineProperty on ContextValue');
+      },
+      getOwnPropertyDescriptor(_target, key) {
+        const value = getProp(key);
+        if (value === undefined) return undefined;
+        return {
+          value,
+          writable: false,
+          enumerable: false,
+          configurable: false,
+        };
+      },
+    },
+  );
+}
