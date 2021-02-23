@@ -38,6 +38,8 @@ jobs:
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
         run: yarn install --frozen-lockfile
       - run: yarn build
+      - name: Print node.js version
+        run: echo "node version = ${{ matrix.node-version }}"
       - name: Dump github_event context
         run: echo $GITHUB_EVENT_CONTEXT
         env:

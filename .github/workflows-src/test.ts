@@ -55,6 +55,11 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
 
   run('yarn build');
 
+  run(
+    `Print node.js version`,
+    interpolate`echo "node version = ${nodeVersion}"`,
+  );
+
   function dumpContext(name: string, context: Expression<unknown>) {
     run(`Dump ${name} context`, `echo $${name.toUpperCase()}_CONTEXT`, {
       env: {[`${name.toUpperCase()}_CONTEXT`]: toJSON(context)},

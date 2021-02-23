@@ -347,12 +347,14 @@ export default function createWorkflow(
           },
           run: ((
             nameOrScript: string,
-            scriptOrOptions?: string | RunStepOptions,
+            scriptOrOptions?: Expression<string> | RunStepOptions,
             optionsOrUndefined?: RunStepOptions,
           ) => {
             const id = `step_${nextStepID++}`;
             const [name, script, options] =
-              typeof scriptOrOptions === 'string'
+              typeof scriptOrOptions === 'string' ||
+              isComplexExpression(scriptOrOptions) ||
+              isContextValue(scriptOrOptions)
                 ? [nameOrScript, scriptOrOptions, optionsOrUndefined]
                 : [undefined, nameOrScript, scriptOrOptions];
             const step: any = {
