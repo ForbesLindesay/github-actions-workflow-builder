@@ -53,6 +53,24 @@ export interface UseStepOptions {
   continueOnError?: Expression<boolean>;
   timeoutMinutes?: Expression<number>;
 }
+export type JobPermissions =
+  | 'read-all'
+  | 'write-all'
+  | {
+      actions?: 'read' | 'write' | 'none';
+      checks?: 'read' | 'write' | 'none';
+      contents?: 'read' | 'write' | 'none';
+      deployments?: 'read' | 'write' | 'none';
+      'id-token'?: 'read' | 'write' | 'none';
+      issues?: 'read' | 'write' | 'none';
+      discussions?: 'read' | 'write' | 'none';
+      packages?: 'read' | 'write' | 'none';
+      pages?: 'read' | 'write' | 'none';
+      'pull-requests'?: 'read' | 'write' | 'none';
+      'repository-projects'?: 'read' | 'write' | 'none';
+      'security-events'?: 'read' | 'write' | 'none';
+      statuses?: 'read' | 'write' | 'none';
+    };
 export interface JobContext {
   readonly jobName: string;
 
@@ -70,6 +88,7 @@ export interface JobContext {
       | 'windows-2019'
       | string,
   ): void;
+  setPermissions(permissions: JobPermissions): void;
   setContainer(container: {
     image: Expression<string>;
     env?: {[key in string]?: Expression<string>};
@@ -151,6 +170,8 @@ export interface WorkflowContext {
       ? TConfig
       : never,
   ): TriggerContext<TriggerName>;
+
+  setPermissions(permissions: JobPermissions): void;
 
   addJob<TJobOutputs extends void | Record<string, Expression<any>>>(
     jobName: string,
@@ -252,6 +273,9 @@ export default function createWorkflow(
         workflow.on[name] = config ?? null;
         return github.event as any;
       },
+      setPermissions(permissions) {
+        workflow.permissions = permissions;
+      },
       addJob(jobName, fn) {
         const {
           currentCondition: currentJobCondition,
@@ -284,6 +308,9 @@ export default function createWorkflow(
             }
             hasSetRunsOn = true;
             job['runs-on'] = machineType;
+          },
+          setPermissions(permissions) {
+            job.permissions = permissions;
           },
           setContainer(container) {
             if (job.container) {
