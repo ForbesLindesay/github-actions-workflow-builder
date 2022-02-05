@@ -193,10 +193,12 @@ export interface TriggerEvents {
   schedule: WorkflowTriggerEvent<[{cron: string}, ...{cron: string}[]], {}>;
   workflow_dispatch: WorkflowTriggerEvent<
     {
-      [name: string]: {
-        description?: string;
-        required: boolean;
-        default?: string;
+      inputs: {
+        [name: string]: {
+          description?: string;
+          required: boolean;
+          default?: string;
+        };
       };
     },
     {
