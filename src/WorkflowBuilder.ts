@@ -71,6 +71,11 @@ export type JobPermissions =
       'security-events'?: 'read' | 'write' | 'none';
       statuses?: 'read' | 'write' | 'none';
     };
+
+export interface Concurrency {
+  group: Expression<string>;
+  cancelInProgress?: boolean;
+}
 export interface JobContext {
   readonly jobName: string;
 
@@ -89,6 +94,7 @@ export interface JobContext {
       | string,
   ): void;
   setPermissions(permissions: JobPermissions): void;
+  setConcurrency(concurrency: Concurrency): void;
   setContainer(container: {
     image: Expression<string>;
     env?: {[key in string]?: Expression<string>};
@@ -172,6 +178,7 @@ export interface WorkflowContext {
   ): TriggerContext<TriggerName>;
 
   setPermissions(permissions: JobPermissions): void;
+  setConcurrency(concurrency: Concurrency): void;
 
   addJob<TJobOutputs extends void | Record<string, Expression<any>>>(
     jobName: string,
@@ -276,6 +283,12 @@ export default function createWorkflow(
       setPermissions(permissions) {
         workflow.permissions = permissions;
       },
+      setConcurrency(concurrency) {
+        workflow.concurrency = {
+          group: concurrency.group,
+          'cancel-in-progress': concurrency.cancelInProgress,
+        };
+      },
       addJob(jobName, fn) {
         const {
           currentCondition: currentJobCondition,
@@ -311,6 +324,12 @@ export default function createWorkflow(
           },
           setPermissions(permissions) {
             job.permissions = permissions;
+          },
+          setConcurrency(concurrency) {
+            job.concurrency = {
+              group: concurrency.group,
+              'cancel-in-progress': concurrency.cancelInProgress,
+            };
           },
           setContainer(container) {
             if (job.container) {
