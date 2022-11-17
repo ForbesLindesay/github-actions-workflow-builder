@@ -1,20 +1,36 @@
 #! /usr/bin/env node
 
-import 'sucrase/register';
+import {addHook} from 'pirates';
+import {transformSync} from '@swc/wasm';
 import {statSync, readdirSync, unlinkSync} from 'fs';
 import {join, relative, resolve} from 'path';
 import {startChain, param, parse} from 'parameter-reducers';
 import {writeYamlFile} from './';
+
+addHook(
+  (code, filename) =>
+    transformSync(code, {
+      filename,
+      swcrc: false,
+      isModule: 'unknown',
+      module: {type: 'commonjs'},
+    }).code,
+  {
+    exts: [`.js`, `.jsx`, `.ts`, `.tsx`],
+    matcher: (filename) => !filename.includes(`/node_modules/`),
+  },
+);
 
 const parser = startChain()
   .addParam(param.flag(['-c', '--check'], 'check'))
   .addParam(param.flag(['-C', '--cleanup'], 'cleanup'))
   .addParam(param.string(['-d', '--directory'], 'directory'));
 
-const {check = false, cleanup = false, directory} = parse(
-  parser,
-  process.argv.slice(2),
-).extract();
+const {
+  check = false,
+  cleanup = false,
+  directory,
+} = parse(parser, process.argv.slice(2)).extract();
 
 if (!directory) {
   console.error('🚨 You must specify the source directory for your workflows:');

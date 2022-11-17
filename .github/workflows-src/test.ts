@@ -40,7 +40,7 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
 }
 export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
   const nodeVersion = setBuildMatrix({
-    'node-version': ['10.x', '12.x', '14.x'],
+    'node-version': ['12.x', '14.x', '16.x', '18.x'],
   })['node-version'];
 
   add(checkout());

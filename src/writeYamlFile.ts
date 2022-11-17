@@ -4,7 +4,7 @@ import {stringify} from 'yaml';
 function tryReadFileSync(filename: string) {
   try {
     return readFileSync(filename, 'utf8');
-  } catch (ex) {
+  } catch (ex: any) {
     if (ex.code !== 'ENOENT') {
       throw ex;
     }

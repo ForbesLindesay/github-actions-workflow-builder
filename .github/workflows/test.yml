@@ -17,19 +17,20 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 10.x
           - 12.x
           - 14.x
+          - 16.x
+          - 18.x
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
       - name: Enable Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package.json',
             'yarn.lock') }}
