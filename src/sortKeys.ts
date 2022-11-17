@@ -1,4 +1,4 @@
-export default function sortKeys<T>(obj: T, keys: (keyof T)[]): T {
+export default function sortKeys<T extends {}>(obj: T, keys: (keyof T)[]): T {
   const result: any = {};
   for (const key of keys) {
     if (key in obj) {

@@ -19,14 +19,14 @@ jobs:
           - 14.x
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
       - name: Enable Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package.json',
             'yarn.lock') }}
@@ -88,7 +88,7 @@ jobs:
           node-version: 12.x
           registry-url: https://registry.npmjs.org
       - name: Enable Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-12.x-${{ hashFiles('package.json', 'yarn.lock') }}
           path: node_modules

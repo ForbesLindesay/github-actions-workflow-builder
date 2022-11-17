@@ -72,40 +72,37 @@ export default function createContextValue<T>(
     }
     return undefined;
   };
-  return new Proxy<any>(
-    {},
-    {
-      get(_target, key) {
-        return getProp(key);
-      },
-      set() {
-        throw new Error('Cannot set on ContextValue');
-      },
-      deleteProperty() {
-        throw new Error('Cannot delete on ContextValue');
-      },
-      enumerate() {
-        throw new Error('Cannot get keys on ContextValue');
-      },
-      ownKeys() {
-        throw new Error('Cannot get keys on ContextValue');
-      },
-      has(_target, key) {
-        return getProp(key) !== undefined;
-      },
-      defineProperty() {
-        throw new Error('Cannot defineProperty on ContextValue');
-      },
-      getOwnPropertyDescriptor(_target, key) {
-        const value = getProp(key);
-        if (value === undefined) return undefined;
-        return {
-          value,
-          writable: false,
-          enumerable: false,
-          configurable: false,
-        };
-      },
+  return new Proxy<any>({}, {
+    get(_target: any, key: any) {
+      return getProp(key);
     },
-  );
+    set() {
+      throw new Error('Cannot set on ContextValue');
+    },
+    deleteProperty() {
+      throw new Error('Cannot delete on ContextValue');
+    },
+    enumerate() {
+      throw new Error('Cannot get keys on ContextValue');
+    },
+    ownKeys() {
+      throw new Error('Cannot get keys on ContextValue');
+    },
+    has(_target: any, key: any) {
+      return getProp(key) !== undefined;
+    },
+    defineProperty() {
+      throw new Error('Cannot defineProperty on ContextValue');
+    },
+    getOwnPropertyDescriptor(_target: any, key: any) {
+      const value = getProp(key);
+      if (value === undefined) return undefined;
+      return {
+        value,
+        writable: false,
+        enumerable: false,
+        configurable: false,
+      };
+    },
+  } as any);
 }

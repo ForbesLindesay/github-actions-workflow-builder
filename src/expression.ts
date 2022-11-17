@@ -1,6 +1,6 @@
 import {contextValueString, ContextValue, isContextValue} from './ContextValue';
 
-export {ContextValue};
+export type {ContextValue};
 
 const ExpressionString = Symbol('expressionString');
 const ExpressionType = Symbol('expressionType');
