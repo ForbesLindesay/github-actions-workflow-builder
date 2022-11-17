@@ -19,7 +19,7 @@ export interface CheckoutOptions {
 }
 export function checkout(options: CheckoutOptions = {}): Steps {
   return ({use}) => {
-    use(options.stepName || 'Git Checkout', 'actions/checkout@v2', {
+    use(options.stepName || 'Git Checkout', 'actions/checkout@v3', {
       with: {
         repository: options.repository,
         ref: options.ref,
@@ -50,7 +50,7 @@ export interface SetupNodeOptions {
 }
 export function setupNode(options: SetupNodeOptions = {}): Steps {
   return ({use}) => {
-    use(options.stepName || 'Setup Node', 'actions/setup-node@v2', {
+    use(options.stepName || 'Setup Node', 'actions/setup-node@v3', {
       with: {
         'always-auth': options.alwaysAuth,
         'node-version': options.nodeVersion,
@@ -82,7 +82,7 @@ export function cache({
   return ({use}) => {
     const {outputs} = use<{'cache-hit': string}>(
       stepName || 'Enable Cache',
-      'actions/cache@v2',
+      'actions/cache@v3',
       {
         with: {
           key,
@@ -109,7 +109,7 @@ export function uploadArtifact(
   options: UploadArtifactOptions,
 ): Steps<{name: Expression<string>}> {
   return ({use}) => {
-    use(options.stepName || 'Upload Artifact', 'actions/upload-artifact@v2', {
+    use(options.stepName || 'Upload Artifact', 'actions/upload-artifact@v3', {
       with: {
         name: options.name,
         path: joinStrings(options.paths, '\n'),
@@ -130,7 +130,7 @@ export function downloadArtifact(options: DownloadArtifactOptions): Steps {
   return ({use}) => {
     use(
       options.stepName || 'Download Artifact',
-      'actions/download-artifact@v2',
+      'actions/download-artifact@v3',
       {
         with: {
           name: options.name,
