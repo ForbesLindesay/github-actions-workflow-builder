@@ -152,6 +152,9 @@ export interface PullRequest {
   review_comment_url: string;
   comments_url: string;
   statuses_url: string;
+  base: {
+    ref: string
+  }
   // TODO: way more stuff goes here
 }
 
