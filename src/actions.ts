@@ -19,7 +19,7 @@ export interface CheckoutOptions {
 }
 export function checkout(options: CheckoutOptions = {}): Steps {
   return ({use}) => {
-    use(options.stepName || 'Git Checkout', 'actions/checkout@v3', {
+    use(options.stepName || 'Git Checkout', 'actions/checkout@v4', {
       with: {
         repository: options.repository,
         ref: options.ref,
@@ -82,7 +82,7 @@ export function cache({
   return ({use}) => {
     const {outputs} = use<{'cache-hit': string}>(
       stepName || 'Enable Cache',
-      'actions/cache@v3',
+      'actions/cache@v4',
       {
         with: {
           key,
