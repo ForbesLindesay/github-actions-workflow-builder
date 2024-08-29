@@ -13,7 +13,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   addJob('publish', ({addDependencies, add, run, use}) => {
     addDependencies(testJob);
-    use('actions/checkout@v2');
+    use('actions/checkout@v4');
     use('actions/setup-node@v1', {
       with: {
         'node-version': '12.x',
