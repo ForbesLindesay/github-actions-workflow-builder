@@ -1,7 +1,7 @@
 # !!! This file is auto-generated, do not edit by hand !!!
 # To make changes, edit .github/workflows-src/test.ts and then run:
 #
-#   github-actions-workflow-builder --directory ".github/workflows-src""
+#   github-actions-workflow-builder --directory ".github/workflows-src"
 
 name: Test
 on:
@@ -17,10 +17,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 12.x
-          - 14.x
-          - 16.x
           - 18.x
+          - 20.x
+          - 22.x
     steps:
       - name: Git Checkout
         uses: actions/checkout@v4
@@ -39,6 +38,7 @@ jobs:
       - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
         run: yarn install --frozen-lockfile
       - run: yarn build
+      - run: yarn test
       - name: Print node.js version
         run: echo "node version = ${{ matrix.node-version }}"
       - name: Print using nested interpolation

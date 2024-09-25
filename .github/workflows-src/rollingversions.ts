@@ -16,11 +16,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     use('actions/checkout@v4');
     use('actions/setup-node@v1', {
       with: {
-        'node-version': '12.x',
+        'node-version': '20.x',
         'registry-url': 'https://registry.npmjs.org',
       },
     });
-    add(yarnInstallWithCache('12.x'));
+    add(yarnInstallWithCache('20.x'));
     run('yarn build');
     run('npx rollingversions publish', {
       env: {
