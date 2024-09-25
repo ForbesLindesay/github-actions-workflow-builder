@@ -1,7 +1,7 @@
 # !!! This file is auto-generated, do not edit by hand !!!
 # To make changes, edit .github/workflows-src/cron.ts and then run:
 #
-#   github-actions-workflow-builder --directory ".github/workflows-src""
+#   github-actions-workflow-builder --directory ".github/workflows-src"
 
 name: CRON
 on:

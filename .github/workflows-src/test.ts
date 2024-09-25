@@ -38,7 +38,7 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
     });
   };
 }
-export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
+export const TEST_JOB: Job = ({setBuildMatrix, add, run, when}) => {
   const nodeVersion = setBuildMatrix({
     'node-version': ['12.x', '14.x', '16.x', '18.x'],
   })['node-version'];
@@ -54,6 +54,7 @@ export const TEST_JOB: Job = ({setBuildMatrix, add, use, run, when}) => {
   add(yarnInstallWithCache(nodeVersion));
 
   run('yarn build');
+  run('yarn test');
 
   run(
     `Print node.js version`,
