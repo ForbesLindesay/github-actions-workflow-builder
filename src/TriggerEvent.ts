@@ -127,6 +127,13 @@ export interface Repository {
   default_branch: string;
 }
 
+export interface Ref {
+  label: string;
+  ref: string;
+  repo: Repository;
+  sha: string;
+  user: User;
+}
 export interface PullRequest {
   url: string;
   id: number;
@@ -152,9 +159,8 @@ export interface PullRequest {
   review_comment_url: string;
   comments_url: string;
   statuses_url: string;
-  base: {
-    ref: string
-  }
+  base: Ref;
+  head: Ref;
   // TODO: way more stuff goes here
 }
 
